@@ -1,0 +1,62 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid;
+}
+
+.logo {
+    width: 200px;
+    padding: 20px;
+}
+
+.nav-items > ul {
+    display: flex;
+    font-size: 20px;
+    list-style-type: none;
+}
+
+.nav-items > ul > li {
+    padding: 10px;
+    margin: 10px;
+}
+
+.res-card{
+    border: 1px solid black;
+    width:200px;
+   
+    background-color: #f2f2f2;
+    padding: 5px;
+    margin: 5px;
+}
+.res-logo{
+    width: 200px;
+    height: 200px;
+    
+}
+.res-conatiner{
+    display: flex;
+    flex-wrap: wrap;
+}
+.filter{
+    padding: 10px;
+    display: flex;
+    
+}
+.filter-btn {
+   
+    margin-left: 2%;
+}
+.shimmer-conatiner{
+    display: flex;
+    flex-wrap: wrap;
+}
+.shimmer-card{
+    margin: 20px;
+    width: 200px;
+    height: 400px;
+    background-color: #f0f0f0;
+}
+.login{
+    padding: 0 20px;
+    cursor: pointer;
+}
