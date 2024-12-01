@@ -1,15 +1,16 @@
-import RestaurantCard from "./RestaurantCard";
-import resList from "../utils/mockData";
+import RestaurantCard ,{withPromotedLabel} from "./RestaurantCard";
+import useOnlineStatus from "../utils/useOnlineStatus";
 import { useEffect, useState } from "react";
 import Shimmer from "./Shimmer";
-
+import { Link } from "react-router-dom";
 const Body=()=>{
     const [listOfRestaurants, setListOfRestaurants] = useState([]);
     const [filteredRestaurant, setFilteredRestaurant]= useState([]);
     const [searchText, setSearchText] = useState("");
 
+    const RestaurantCardPromoted = withPromotedLabel(RestaurantCard);
     //whenever state variable updates, react triggers a reconciliation cycle(re-renders the component)
-    console.log("Body Rerendered");
+    console.log("Body Rerendered", listOfRestaurants);
     
     useEffect(()=>{
         fetchData();
@@ -25,6 +26,17 @@ const Body=()=>{
         setListOfRestaurants(json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
         setFilteredRestaurant(json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
     };
+
+
+    const onlineStatus= useOnlineStatus();
+
+    if(onlineStatus === false) 
+        return (
+        <h1>Look's like you're offline!! Please check your internet connection
+
+        </h1>
+    );
+
     // conditional rendering
     if (listOfRestaurants.length === 0) {
         return <Shimmer/>;
@@ -32,17 +44,17 @@ const Body=()=>{
 
     return listOfRestaurants.length === 0? (<Shimmer/>) :(
         <div className='body'>
-            <div className='filter'>
-                <div className="search">
+            <div className='filter flex '>
+                <div className="search m-4 p-4">
                      
-                    <input type="text" className="search-box"
+                    <input type="text" className=" border border-solid border-black"
                     //as soon as my input changes my on change fun should change my search text
                         value={searchText}
                         onChange={(e)=>{
                             setSearchText(e.target.value);
                         }}
                     />
-                    <button onClick={()=>{
+                    <button className="px-4 py-2 m-4 bg-green-100 rounded-lg" onClick={()=>{
                         console.log(searchText);
                         
                         //filter out
@@ -55,7 +67,8 @@ const Body=()=>{
                     Search</button>
 
                 </div>
-                <button className="filter-btn"
+                <div className="search m-4 p-4 flex items-center">
+                <button className="px-4 py-2  bg-gray-100  rounded-lg"
                     onClick={()=>{
                         const filteredList = listOfRestaurants.filter(
                             (res)=>res.info.avgRatingString>4
@@ -64,8 +77,10 @@ const Body=()=>{
                     }}>
                     Top Rated Restaurants
                 </button>
+                </div>
+                
             </div>
-                <div className='res-conatiner'>
+                <div className='res-conatiner flex flex-wrap'>
                    {/*
                    <RestaurantCard resName="Meghna Foods" cuisine="Biryani, North Indian"/>
                     <RestaurantCard resName="KFC" cuisine="Burger"/>. resdata is prop resobj is arg
@@ -73,7 +88,18 @@ const Body=()=>{
                     */}
                     
                     {filteredRestaurant.map((restaurant)=>(
-                        <RestaurantCard key={restaurant.info.id} resData={restaurant}/>
+                        <Link key={restaurant.info.id} to={"/restaurants/"+ restaurant.info.id}>
+                        
+                        {//if rest is promoted
+                            restaurant.info.avgRatingString>=4.2 ?(
+                                <RestaurantCardPromoted resData={restaurant}/>
+                            ):(
+                                <RestaurantCard resData={restaurant}/>
+                            )
+
+                        }
+                            
+                        </Link>
                     ))}
                     
                 </div>

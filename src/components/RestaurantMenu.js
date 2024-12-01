@@ -1,48 +1,47 @@
-import { useState, useEffect } from "react";
+
 import Shimmer from "./Shimmer";
 import { useParams } from "react-router-dom";
+import RestaurantCategory from "./RestaurantCategory";
+
+import useResturantMenu from "../utils/useRestaurantMenu";
+import { useState } from "react";
 
 const RestaurantMenu=()=>{
 
-    //to load the data we need to use state variables
-    const [resInfo, setResInfo] = useState(null);
-    ///const params = useParams(); 
-    //console.log(params);
+    const {resId} = useParams(); 
 
-    useEffect(()=>{
-        fetchMenu();
-    },[]);
+    const resInfo = useResturantMenu(resId);
 
-    const fetchMenu = async()=>{
-        const data= await fetch(
-            "https://www.swiggy.com/dapi/menu/pl?page-type=REGULAR_MENU&complete-menu=true&lat=12.9371531&lng=77.6901166&restaurantId=908346&catalog_qa=undefined&submitAction=ENTER"
-        );
-        const json= await data.json();
-        console.log(json);
-        //after getting the data fill resInfo with data
-        setResInfo(json.data);
-    };
+    const [showIndex, setShowIndex] = useState(1);
+
     if (resInfo===null) return  (<Shimmer/>)
     const{name, cuisines, costForTwoMessage}= resInfo?.cards?.[2]?.card?.card?.info  || {};
 
     const{itemCards} = resInfo?.cards?.[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards?.[1]?.card?.card  || {};
     
-    console.log(itemCards);
+    console.log(resInfo?.cards?.[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards);
+
+    const categories= resInfo?.cards?.[4]?.groupedCard?.cardGroupMap?.REGULAR?.cards.filter(
+        (c)=>c.card?.card?.["@type"]==="type.googleapis.com/swiggy.presentation.food.v2.ItemCategory");
+
+    console.log(categories);
     //shimmer
     
 
     return (
-        <div className="menu">
-            <h1>{name}</h1>
-            <p>{cuisines}- {costForTwoMessage}</p>
+        <div className="menu text-center">
+            <h1 className="font-bold my-6 text-2xl">{name}</h1>
+            <p className="font-bold text-lg">{cuisines}- {costForTwoMessage}</p>
             <h2>Menu</h2>
-            <ul>  
-                {itemCards.map((item)=>(
-                    <li key={item.card.info.id}>
-                        {item.card.info.name }-{ "Rs"}
-                        {item.card.info.price/100 || item.card.info.defaultPrice/100}</li>
-                ))}
-            </ul>
+            {
+                //categories accordion
+                categories.map((category,index)=> (
+                <RestaurantCategory key={category?.card?.card?.name} data={category?.card?.card}
+                showItems={index===showIndex ? true:false}
+                setShowIndex={()=>setShowIndex(index)}
+                />))
+                
+            }
         </div>
     )
 }
