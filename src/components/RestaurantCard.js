@@ -2,6 +2,7 @@
 
 const RestaurantCard=(props)=>{
     const {resData}= props;
+    console.log(resData);   
 
     const{name,cuisines,costForTwo, deliveryTime,avgRatingString}= resData?.info;
 

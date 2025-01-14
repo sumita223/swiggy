@@ -1,110 +1,121 @@
-import RestaurantCard ,{withPromotedLabel} from "./RestaurantCard";
-import useOnlineStatus from "../utils/useOnlineStatus";
-import { useEffect, useState } from "react";
-import Shimmer from "./Shimmer";
+import React, { useContext, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-const Body=()=>{
+import RestaurantCard, { withPromotedLabel } from "./RestaurantCard";
+import useOnlineStatus from "../utils/useOnlineStatus";
+import Shimmer from "./Shimmer";
+import UserContext from "../utils/userContext";
+
+const Body = () => {
     const [listOfRestaurants, setListOfRestaurants] = useState([]);
-    const [filteredRestaurant, setFilteredRestaurant]= useState([]);
+    const [filteredRestaurant, setFilteredRestaurant] = useState([]);
     const [searchText, setSearchText] = useState("");
+    const [isTopRated, setIsTopRated] = useState(false);
 
     const RestaurantCardPromoted = withPromotedLabel(RestaurantCard);
-    //whenever state variable updates, react triggers a reconciliation cycle(re-renders the component)
-    console.log("Body Rerendered", listOfRestaurants);
-    
-    useEffect(()=>{
-        fetchData();
-    },[]);
 
-    const fetchData= async ()=>{
-        const data= await fetch(
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        const data = await fetch(
             "https://www.swiggy.com/dapi/restaurants/list/v5?lat=12.9371531&lng=77.6901166&is-seo-homepage-enabled=true&page_type=DESKTOP_WEB_LISTING"
         );
 
-        const json= await data.json();
-        console.log(json.data.cards[4].card.card.gridElements.infoWithStyle.restaurants);
+        const json = await data.json();
         setListOfRestaurants(json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
         setFilteredRestaurant(json?.data?.cards[4]?.card?.card?.gridElements?.infoWithStyle?.restaurants);
     };
 
+    const onlineStatus = useOnlineStatus();
 
-    const onlineStatus= useOnlineStatus();
-
-    if(onlineStatus === false) 
+    if (onlineStatus === false) 
         return (
-        <h1>Look's like you're offline!! Please check your internet connection
+            <h1 className="text-2xl font-bold text-center mt-10 text-red-600">
+                Looks like you're offline!! Please check your internet connection
+            </h1>
+        );
 
-        </h1>
-    );
+    const { loggedInUser, setUserName } = useContext(UserContext);
 
-    // conditional rendering
     if (listOfRestaurants.length === 0) {
-        return <Shimmer/>;
+        return <Shimmer />;
     }
 
-    return listOfRestaurants.length === 0? (<Shimmer/>) :(
-        <div className='body'>
-            <div className='filter flex '>
-                <div className="search m-4 p-4">
-                     
-                    <input type="text" className=" border border-solid border-black"
-                    //as soon as my input changes my on change fun should change my search text
+    const handleSearch = () => {
+        const filtered = listOfRestaurants.filter((res) => 
+            res.info.name.toLowerCase().includes(searchText.toLowerCase())
+        );
+        setFilteredRestaurant(filtered);
+    };
+
+    const handleTopRated = () => {
+        setIsTopRated(!isTopRated);
+        if (!isTopRated) {
+            const topRated = listOfRestaurants.filter(
+                (res) => parseFloat(res.info.avgRatingString) > 4.3
+            );
+            setFilteredRestaurant(topRated);
+        } else {
+            setFilteredRestaurant(listOfRestaurants);
+        }
+    };
+
+    return (
+        <div className='body max-w-7xl mx-auto px-4 py-8'>
+            <div className='filter flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0 md:space-x-4'>
+                <div className="search flex items-center w-full md:w-auto">
+                    <input 
+                        type="text"
+                        data-testid="searchInput" 
+                        className="w-full md:w-64 px-4 py-2 rounded-l-lg border-2 border-gray-300 focus:outline-none focus:border-teal-500"
+                        placeholder="Search restaurants..."
                         value={searchText}
-                        onChange={(e)=>{
-                            setSearchText(e.target.value);
-                        }}
+                        onChange={(e) => setSearchText(e.target.value)}
                     />
-                    <button className="px-4 py-2 m-4 bg-green-100 rounded-lg" onClick={()=>{
-                        console.log(searchText);
-                        
-                        //filter out
-                        const filteredRestaurant = listOfRestaurants.filter((res) => {
-                            return res.info.name.toLowerCase().includes(searchText.toLowerCase());
-                        });
-
-                        setFilteredRestaurant(filteredRestaurant);
-                    }}>
-                    Search</button>
-
+                    <button 
+                        className="bg-teal-500 text-white px-4 py-2 rounded-r-lg hover:bg-teal-600 transition duration-300"
+                        onClick={handleSearch}
+                    >
+                        Search
+                    </button>
                 </div>
-                <div className="search m-4 p-4 flex items-center">
-                <button className="px-4 py-2  bg-gray-100  rounded-lg"
-                    onClick={()=>{
-                        const filteredList = listOfRestaurants.filter(
-                            (res)=>res.info.avgRatingString>4
-                        );
-                        setListOfRestaurants(filteredList);
-                    }}>
-                    Top Rated Restaurants
+
+                <button 
+                    className={`px-4 py-2 rounded-lg transition duration-300 ${
+                        isTopRated 
+                            ? "bg-amber-500 text-white hover:bg-amber-600" 
+                            : "bg-teal-500 text-white hover:bg-gray-300"
+                    }`}
+                    onClick={handleTopRated}
+                >
+                    {isTopRated ? "Show All" : "Top Rated"} Restaurants
                 </button>
-                </div>
-                
-            </div>
-                <div className='res-conatiner flex flex-wrap'>
-                   {/*
-                   <RestaurantCard resName="Meghna Foods" cuisine="Biryani, North Indian"/>
-                    <RestaurantCard resName="KFC" cuisine="Burger"/>. resdata is prop resobj is arg
-                     BELOW is UI
-                    */}
-                    
-                    {filteredRestaurant.map((restaurant)=>(
-                        <Link key={restaurant.info.id} to={"/restaurants/"+ restaurant.info.id}>
-                        
-                        {//if rest is promoted
-                            restaurant.info.avgRatingString>=4.2 ?(
-                                <RestaurantCardPromoted resData={restaurant}/>
-                            ):(
-                                <RestaurantCard resData={restaurant}/>
-                            )
 
-                        }
-                            
-                        </Link>
-                    ))}
-                    
+                <div className="user-input flex items-center space-x-2">
+                    <label className="font-medium text-gray-700">Username:</label>
+                    <input 
+                        className="border-2 border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:border-teal-500"
+                        value={loggedInUser} 
+                        onChange={(e) => setUserName(e.target.value)}
+                    />
                 </div>
+            </div>
+
+            <div className='res-container grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+                {filteredRestaurant.map((restaurant) => (
+                    <Link key={restaurant.info.id} to={"/restaurants/" + restaurant.info.id}>
+                        {parseFloat(restaurant.info.avgRatingString) >= 4.3 ? (
+                            <RestaurantCardPromoted resData={restaurant} />
+                        ) : (
+                            <RestaurantCard resData={restaurant} />
+                        )}
+                    </Link>
+                ))}
+            </div>
         </div>
     );
 };
 
 export default Body;
+

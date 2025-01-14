@@ -1,32 +1,13 @@
-import User from "./User";
-import React from "react";
-import UserClass from "./UserClass";
-
-class About extends React.Component{
-
-    constructor(props){
-        super(props);
-    
-    //console.log("Parent constructor");
-    }
-
-    componentDidMount(){
-        //console.log("Parent Component Did Mount");  
-    }
-    render(){
-       // console.log("Parent render");
-        return(
-            <div>
-            <h1>Hi</h1>
-            <User name={"Sumita(function)" } location={"Guwahati(class)"}/>
-
-            <UserClass name={"Sumita(class)"} location={"Delhi(class)"}/>
+import React from 'react'
+import Github from './Github'
+const About = () => {
+  return (
+    <div className="about-us container mx-auto p-4">
+            
+            
+            <Github />
         </div>
-        )
-    }
-}
-
-
-
+  )
+};
 
 export default About;
