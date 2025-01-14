@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { LOGO_URL } from "../utils/constants";
 import useOnlineStatus from "../utils/useOnlineStatus";
-import UserContext from "../utils/userContext";
+import UserContext from "../utils/UserContext";
 import { ShoppingCart, Menu, X } from 'lucide-react';
 
 const Header = () => {
