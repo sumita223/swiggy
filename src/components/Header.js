@@ -1,5 +1,5 @@
-import { useState, useContext } from "react";
-import { Link } from "react-router-dom";
+import { useState, useContext, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import { LOGO_URL } from "../utils/constants";
@@ -11,8 +11,26 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [btnNameReact, setBtnNameReact] = useState("Login");
   const onlineStatus = useOnlineStatus();
-  const { loggedInUser } = useContext(UserContext);
+  const navigate = useNavigate();
+  //const { loggedInUser } = useContext(UserContext);
+
+  const [loggedInUser, setLoggedInUser] = useState('');
   const cartItems = useSelector((store) => store.cart.items);
+
+  const handleLogout = (e) => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('loggedInUser');
+    alert('User Loggedout');
+    setTimeout(() => {
+        navigate('/login');
+    }, 1000)
+}
+
+
+  useEffect(() => {
+    setLoggedInUser(localStorage.getItem('loggedInUser'))
+}, [])
+
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -68,13 +86,15 @@ const Header = () => {
             <span className={`w-3 h-3 rounded-full ${onlineStatus ? "bg-green-400" : "bg-red-500"}`}></span>
             <span>{onlineStatus ? "Online" : "Offline"}</span>
           </div>
-          <span className="font-medium px-5 py-2.5 rounded-full bg-white bg-opacity-20 text-lg">{loggedInUser}</span>
+          <span className="font-medium px-5 py-2.5 rounded-full bg-white bg-opacity-20 text-lg">
+            {loggedInUser}</span>
           <button
             className="bg-amber-400 hover:bg-amber-300 text-teal-900 px-7 py-2.5 rounded-full transition duration-200 shadow-md hover:shadow-lg font-semibold text-lg"
-            onClick={() => setBtnNameReact(btnNameReact === "Login" ? "Log Out" : "Login")}
+            onClick={handleLogout}
           >
-            {btnNameReact}
+            Logout
           </button>
+         
         </nav>
 
         {/* Mobile Menu Button */}

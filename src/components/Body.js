@@ -63,7 +63,7 @@ const Body = () => {
 
     return (
         <div className='body max-w-7xl mx-auto px-4 py-8'>
-            <div className='filter flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0 md:space-x-4'>
+            <div className='filter flex flex-col md:flex-row justify-start items-center  mb-8 space-y-4 md:space-y-0 md:space-x-8'>
                 <div className="search flex items-center w-full md:w-auto">
                     <input 
                         type="text"
@@ -87,19 +87,13 @@ const Body = () => {
                             ? "bg-amber-500 text-white hover:bg-amber-600" 
                             : "bg-teal-500 text-white hover:bg-gray-300"
                     }`}
+                    style={{ marginLeft: '530px' }} 
                     onClick={handleTopRated}
                 >
                     {isTopRated ? "Show All" : "Top Rated"} Restaurants
                 </button>
 
-                <div className="user-input flex items-center space-x-2">
-                    <label className="font-medium text-gray-700">Username:</label>
-                    <input 
-                        className="border-2 border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:border-teal-500"
-                        value={loggedInUser} 
-                        onChange={(e) => setUserName(e.target.value)}
-                    />
-                </div>
+                
             </div>
 
             <div className='res-container grid  grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
